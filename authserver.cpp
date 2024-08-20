@@ -31,7 +31,6 @@ void AuthServer::onReadyRead() {
     if (socket) {
         QByteArray data = socket->readAll();
         if (data == "CLOSE") {
-            qDebug() << "Client disconnected: " << socket->socketDescriptor();
             socket->close();
         }
         // qDebug() << "Data received:" << data;
@@ -43,6 +42,7 @@ void AuthServer::onSocketStateChanged(QAbstractSocket::SocketState socketState) 
     if (socketState == QAbstractSocket::UnconnectedState) {
         QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
         if (socket) {
+            qDebug() << "Client disconnected: " << socket->socketDescriptor();
             socket->deleteLater();
         }
     }
