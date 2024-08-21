@@ -6,6 +6,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+typedef int64_t id;
+
 class DatabaseManager : public QObject
 {
     Q_OBJECT
@@ -13,7 +15,7 @@ public:
     explicit DatabaseManager(QObject* parent = nullptr);
     ~DatabaseManager();
 
-    bool insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
+    id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
     bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
 
 private:

@@ -18,20 +18,20 @@ DatabaseManager::~DatabaseManager() {
     closeDatabase();
 }
 
-bool DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage) {
+id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage) {
     QSqlDatabase* db = threadDbStorage.localData();
 
     if (!db) {
         qDebug() << "Database: connection not initialized";
-        return false;
+        return 0;
     }
     if (!db->isOpen()) {
         qDebug() << "Database: connection closed";
-        return false;
+        return 0;
     }
     if (!db->isValid()) {
         qDebug() << "Database: connection is not valid";
-        return false;
+        return 0;
     }
 
     qDebug() << "Database: connection is valid";
@@ -47,9 +47,15 @@ bool DatabaseManager::insertRegisterInfo(const QString& nickname, const QString&
     query.bindValue(":phone", phone);
 
     if (query.exec()) {
-        hintMessage = "注册成功";
-        qDebug() << "Insert query executed successfully";
-        return true;
+        // 获取自动生成的 ID
+        QSqlQuery idQuery(*db);
+        idQuery.exec("SELECT LAST_INSERT_ID()");
+        if (idQuery.next()) {
+            id generatedId = idQuery.value(0).toLongLong();
+            hintMessage = "注册成功，QQ账号: " + QString::number(generatedId);
+            qDebug() << "Insert query executed successfully, generated ID:" << generatedId;
+            return generatedId;
+        }
     } else {
         QSqlError error = query.lastError();
         qDebug() << "Insert query failed:" << error.text();
@@ -60,8 +66,8 @@ bool DatabaseManager::insertRegisterInfo(const QString& nickname, const QString&
         } else {
             hintMessage = error.text();
         }
-        return false;
     }
+    return 0;
 }
 
 bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& password, QString& hintMessage) {

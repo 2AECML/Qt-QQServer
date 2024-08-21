@@ -73,16 +73,21 @@ void AuthServer::verifyLogin(QTcpSocket* socket, const QString& account, const Q
 
 void AuthServer::verifyRegister(QTcpSocket* socket, const QString& nickname, const QString& password, const QString& phone, const QString& vcode) {
     QString message;
-    bool success = mDbManager->insertRegisterInfo(nickname, password, phone, message);
+    id accountID = mDbManager->insertRegisterInfo(nickname, password, phone, message);
+    bool success = accountID != 0 ? true : false;
     // qDebug() << message;
-    respondToClient(socket, "register", success, message);
+    respondToClient(socket, "register", success, message, accountID);
 }
 
-void AuthServer::respondToClient(QTcpSocket* socket, const QString& type, const bool success, const QString& message) {
+void AuthServer::respondToClient(QTcpSocket* socket, const QString& type, const bool success, const QString& message, const id accountID) {
     QJsonObject json;
     json["type"] = type;
     json["success"] = success;
     json["message"] = message;
+
+    if (type == "register") {
+        json["id"] = accountID;
+    }
 
     QJsonDocument doc(json);
 
