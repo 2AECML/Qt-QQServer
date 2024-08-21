@@ -86,7 +86,7 @@ void AuthServer::respondToClient(QTcpSocket* socket, const QString& type, const 
     json["message"] = message;
 
     if (type == "register") {
-        json["id"] = accountID;
+        json["id"] = QJsonValue(static_cast<qint64>(accountID));
     }
 
     QJsonDocument doc(json);
