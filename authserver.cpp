@@ -23,6 +23,9 @@ void AuthServer::incomingConnection(qintptr socketDescriptor) {
     connect(socket, &QTcpSocket::stateChanged, this, &AuthServer::onSocketStateChanged);
 
     qDebug() << "Client connected: " << socketDescriptor;
+
+    // 记录套接字描述符和套接字对象的映射
+    mSocketMap.insert(socket, socket->socketDescriptor());
 }
 
 void AuthServer::onReadyRead() {
@@ -42,7 +45,9 @@ void AuthServer::onSocketStateChanged(QAbstractSocket::SocketState socketState) 
     if (socketState == QAbstractSocket::UnconnectedState) {
         QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
         if (socket) {
-            qDebug() << "Client disconnected: " << socket->socketDescriptor();
+            qintptr socketDescriptor = mSocketMap[socket];
+            qDebug() << "Client disconnected: " << socketDescriptor;
+            mSocketMap.remove(socket);
             socket->deleteLater();
         }
     }

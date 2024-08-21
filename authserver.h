@@ -7,6 +7,7 @@
 #include <QList>
 #include <QByteArray>
 #include <QJsonObject>
+#include <QMap>
 
 class AuthServer : public QTcpServer
 {
@@ -30,6 +31,7 @@ private:
 
 private:
     DatabaseManager* mDbManager;
+    QMap<QTcpSocket*, qintptr> mSocketMap;
 };
 
 #endif // AUTHSERVER_H
