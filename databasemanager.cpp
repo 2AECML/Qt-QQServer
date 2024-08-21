@@ -51,6 +51,9 @@ bool DatabaseManager::insertRegisterInfo(const QString& nickname, const QString&
         else if (error.nativeErrorCode() == "1062") {
             hintMessage = "注册失败，该手机号已被注册";
         }
+        else {
+            hintMessage = error.text();
+        }
         return false;
     }
 }
