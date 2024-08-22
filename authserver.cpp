@@ -1,7 +1,9 @@
 #include "authserver.h"
 #include <QJsonDocument>
 
-AuthServer::AuthServer(QObject *parent) : QTcpServer(parent), mDbManager(new DatabaseManager(this)){
+AuthServer::AuthServer(QObject *parent)
+    : QTcpServer(parent)
+    , mDbManager(new DatabaseManager(this)){
 
 }
 
@@ -11,7 +13,7 @@ void AuthServer::startServer() {
     }
     else {
         qDebug() << "Server could not start!";
-    qDebug() << "Error" << this->errorString();
+        qDebug() << "Error" << this->errorString();
     }
 }
 

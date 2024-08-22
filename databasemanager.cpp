@@ -25,20 +25,9 @@ DatabaseManager::~DatabaseManager() {
 id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage) {
     QSqlDatabase* db = threadDbStorage.localData();
 
-    if (!db) {
-        qDebug() << "Database: connection not initialized";
-        return 0;
+    if (!checkDatabase(db)) {
+        return false;
     }
-    if (!db->isOpen()) {
-        qDebug() << "Database: connection closed";
-        return 0;
-    }
-    if (!db->isValid()) {
-        qDebug() << "Database: connection is not valid";
-        return 0;
-    }
-
-    qDebug() << "Database: connection is valid";
 
     // 哈希密码
     QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256);
@@ -77,20 +66,9 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
 bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& password, QString& hintMessage) {
     QSqlDatabase* db = threadDbStorage.localData();
 
-    if (!db) {
-        qDebug() << "Database: connection not initialized";
+    if (!checkDatabase(db)) {
         return false;
     }
-    if (!db->isOpen()) {
-        qDebug() << "Database: connection closed";
-        return false;
-    }
-    if (!db->isValid()) {
-        qDebug() << "Database: connection is not valid";
-        return false;
-    }
-
-    qDebug() << "Database: connection is valid";
 
     QSqlQuery query(*db);
 
@@ -119,6 +97,31 @@ bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& pas
         qDebug() << "Login query failed: account not found";
         return false;
     }
+}
+
+QList<BasicUserInfo> DatabaseManager::getUserList() {
+    QSqlDatabase* db = threadDbStorage.localData();
+
+    if (!checkDatabase(db)) {
+        return QList<BasicUserInfo>();
+    }
+
+    QList<BasicUserInfo> result;
+
+    QSqlQuery query(*db);
+
+    query.prepare(R"(SELECT * FROM db_qq.user_info)");
+
+    if (!query.exec()) {
+        while (query.next()) {
+            BasicUserInfo info;
+            info.id = query.value("id").toString();
+            info.nickname = query.value("nickname").toString();
+            result.append(info);
+        }
+    }
+
+    return result;
 }
 
 bool DatabaseManager::connectToDatabase() {
@@ -158,6 +161,24 @@ void DatabaseManager::closeDatabase() {
         QSqlDatabase::removeDatabase(connectionName);
         qDebug() << "Database connection removed";
     }
+}
+
+bool DatabaseManager::checkDatabase(QSqlDatabase* db) {
+    if (!db) {
+        qDebug() << "Database: connection not initialized";
+        return false;
+    }
+    if (!db->isOpen()) {
+        qDebug() << "Database: connection closed";
+        return false;
+    }
+    if (!db->isValid()) {
+        qDebug() << "Database: connection is not valid";
+        return false;
+    }
+
+    qDebug() << "Database: connection is valid";
+    return true;
 }
 
 void DatabaseManager::keepConnectionAlive() {
