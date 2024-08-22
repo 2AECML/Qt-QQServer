@@ -30,8 +30,8 @@ private:
     void respondToClient(QTcpSocket* socket, const QString& type, const bool success, const QString& message, const id accountID = 0);
 
 private:
-    DatabaseManager* mDbManager;
     QMap<QTcpSocket*, qintptr> mSocketMap;
+    quint16 mPort;
 };
 
 #endif // AUTHSERVER_H

@@ -3,12 +3,12 @@
 
 AuthServer::AuthServer(QObject *parent)
     : QTcpServer(parent)
-    , mDbManager(new DatabaseManager(this)){
+    , mPort(8052){
 
 }
 
 void AuthServer::startServer() {
-    if (this->listen(QHostAddress::Any, 8052)) {
+    if (this->listen(QHostAddress::Any, mPort)) {
         qDebug() << "Auth server started!";
     }
     else {
@@ -68,14 +68,16 @@ void AuthServer::processData(QTcpSocket* socket, const QByteArray &data) {
 
 void AuthServer::verifyLogin(QTcpSocket* socket, const QString& account, const QString& password) {
     QString message;
-    bool success = mDbManager->verifyLoginInfo(account, password, message);
+    DatabaseManager* databaseManager = DatabaseManager::getInstance();
+    bool success = databaseManager->verifyLoginInfo(account, password, message);
     // qDebug() << message;
     respondToClient(socket, "login", success, message);
 }
 
 void AuthServer::verifyRegister(QTcpSocket* socket, const QString& nickname, const QString& password, const QString& phone, const QString& vcode) {
     QString message;
-    id accountID = mDbManager->insertRegisterInfo(nickname, password, phone, message);
+    DatabaseManager* databaseManager = DatabaseManager::getInstance();
+    id accountID = databaseManager->insertRegisterInfo(nickname, password, phone, message);
     bool success = accountID != 0 ? true : false;
     // qDebug() << message;
     respondToClient(socket, "register", success, message, accountID);

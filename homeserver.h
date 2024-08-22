@@ -25,8 +25,8 @@ private:
     void sendUserList(QTcpSocket* socket, const QList<BasicUserInfo>& list);
 
 private:
-    DatabaseManager* mDbManager;
     QMap<QTcpSocket*, qintptr> mSocketMap;
+    quint16 mPort;
 };
 
 #endif // HOMESERVER_H

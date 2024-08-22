@@ -5,12 +5,12 @@
 
 HomeServer::HomeServer(QObject *parent)
     : QTcpServer(parent)
-    , mDbManager(new DatabaseManager(this)) {
+    , mPort(8053) {
 
 }
 
 void HomeServer::startServer() {
-    if (this->listen(QHostAddress::Any, 8053)) {
+    if (this->listen(QHostAddress::Any, mPort)) {
         qDebug() << "Home server started!";
     }
     else {
@@ -62,7 +62,8 @@ void HomeServer::processData(QTcpSocket* socket, const QByteArray& data) {
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
     QJsonObject json = jsonDoc.object();
     if (json["type"] == "user_list") {
-        QList<BasicUserInfo> list = mDbManager->getUserList();
+        DatabaseManager* databaseManager = DatabaseManager::getInstance();
+        QList<BasicUserInfo> list = databaseManager->getUserList();
         sendUserList(socket, list);
     }
     else {

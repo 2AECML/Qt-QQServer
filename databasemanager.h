@@ -21,17 +21,19 @@ class DatabaseManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit DatabaseManager(QObject* parent = nullptr);
-    ~DatabaseManager();
 
-    DatabaseManager *getInstance();
-    void releaseInstance();
+
+    static DatabaseManager *getInstance();
+    static void releaseInstance();
 
     id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
     bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
     QList<BasicUserInfo> getUserList();
 
 private:
+    explicit DatabaseManager(QObject* parent = nullptr);
+    ~DatabaseManager();
+
     bool connectToDatabase();
     void closeDatabase();
     bool checkDatabase();
