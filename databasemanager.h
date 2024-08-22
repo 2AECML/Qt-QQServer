@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QTimer>
 
 typedef int64_t id;
 
@@ -22,11 +23,16 @@ private:
     bool connectToDatabase();
     void closeDatabase();
 
+private slots:
+    void keepConnectionAlive();
+
 private:
     QString mHost;
     int mPort;
     QString mUserName;
     QString mPassword;
+
+    QTimer* mKeepAliveTimer;
 };
 
 #endif // DATABASEMANAGER_H

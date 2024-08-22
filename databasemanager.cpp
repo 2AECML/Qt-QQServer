@@ -10,8 +10,12 @@ DatabaseManager::DatabaseManager(QObject* parent)
     : mHost("127.0.0.1")
     , mPort(3306)
     , mUserName("root")
-    , mPassword("805284158"){
+    , mPassword("805284158")
+    , mKeepAliveTimer(new QTimer(this)){
+
     connectToDatabase();
+    connect(mKeepAliveTimer, &QTimer::timeout, this, &DatabaseManager::keepConnectionAlive);
+    mKeepAliveTimer->start(10000);  // 每60秒发送一次保活查询
 }
 
 DatabaseManager::~DatabaseManager() {
@@ -153,5 +157,13 @@ void DatabaseManager::closeDatabase() {
         threadDbStorage.setLocalData(nullptr);
         QSqlDatabase::removeDatabase(connectionName);
         qDebug() << "Database connection removed";
+    }
+}
+
+void DatabaseManager::keepConnectionAlive() {
+    QSqlDatabase* db = threadDbStorage.localData();
+    if (db && db->isOpen() && db->isValid()) {
+        QSqlQuery query(*db);
+        query.exec("SELECT 1");  // 简单的查询以保持连接活跃
     }
 }
