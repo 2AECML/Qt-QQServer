@@ -7,6 +7,8 @@
 #include <QSqlError>
 #include <QTimer>
 #include <QList>
+#include <QMutex>
+#include <QMutexLocker>
 
 typedef int64_t id;
 
@@ -22,6 +24,9 @@ public:
     explicit DatabaseManager(QObject* parent = nullptr);
     ~DatabaseManager();
 
+    DatabaseManager *getInstance();
+    void releaseInstance();
+
     id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
     bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
     QList<BasicUserInfo> getUserList();
@@ -29,7 +34,7 @@ public:
 private:
     bool connectToDatabase();
     void closeDatabase();
-    bool checkDatabase(QSqlDatabase* db);
+    bool checkDatabase();
 
 private slots:
     void keepConnectionAlive();
@@ -41,6 +46,11 @@ private:
     QString mPassword;
 
     QTimer* mKeepAliveTimer;
+
+    static DatabaseManager* instance;
+    static QMutex mutex;  // 用于管理 DatabaseManager 实例的互斥量
+    QMutex dbMutex;       // 用于数据库操作的互斥量
+    QSqlDatabase db;
 };
 
 #endif // DATABASEMANAGER_H
