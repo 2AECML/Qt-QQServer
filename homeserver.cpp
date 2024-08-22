@@ -80,7 +80,11 @@ void HomeServer::sendUserList(QTcpSocket* socket, const QList<BasicUserInfo>& li
         jsonArray.append(jsonObject);
     }
 
-    QJsonDocument jsonDoc(jsonArray);
+    QJsonObject jsonObj;
+    jsonObj["type"] = "user_list";
+    jsonObj["data"] = jsonArray;
+
+    QJsonDocument jsonDoc(jsonObj);
 
     socket->write(jsonDoc.toJson());
 }
