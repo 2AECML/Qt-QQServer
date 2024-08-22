@@ -11,10 +11,10 @@ HomeServer::HomeServer(QObject *parent)
 
 void HomeServer::startServer() {
     if (this->listen(QHostAddress::Any, 8053)) {
-        qDebug() << "Server started!";
+        qDebug() << "Home server started!";
     }
     else {
-        qDebug() << "Server could not start!";
+        qDebug() << "Home server could not start!";
         qDebug() << "Error" << this->errorString();
     }
 }

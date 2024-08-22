@@ -9,10 +9,10 @@ AuthServer::AuthServer(QObject *parent)
 
 void AuthServer::startServer() {
     if (this->listen(QHostAddress::Any, 8052)) {
-        qDebug() << "Server started!";
+        qDebug() << "Auth server started!";
     }
     else {
-        qDebug() << "Server could not start!";
+        qDebug() << "Auth server could not start!";
         qDebug() << "Error" << this->errorString();
     }
 }
