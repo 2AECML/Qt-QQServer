@@ -41,7 +41,7 @@ void HomeServer::onReadyRead() {
         if (data == "CLOSE") {
             socket->close();
         }
-        qDebug() << "HomeServer: Data received:" << data;
+        // qDebug() << "HomeServer: Data received:" << data;
         processData(socket, data);
     }
 }

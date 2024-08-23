@@ -56,6 +56,23 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
         return 0;
     }
 
+    // 先检查手机号是否已存在
+    QSqlQuery checkQuery(mDb);
+    checkQuery.prepare(R"(SELECT COUNT(*) FROM db_qq.user_info WHERE phone = :phone)");
+    checkQuery.bindValue(":phone", phone);
+
+    if (!checkQuery.exec()) {
+        QSqlError error = checkQuery.lastError();
+        qDebug() << "Check phone query failed:" << error.text();
+        hintMessage = "检查手机号失败，发生未知错误";
+        return 0;
+    }
+
+    if (checkQuery.next() && checkQuery.value(0).toInt() > 0) {
+        hintMessage = "注册失败，该手机号已被注册";
+        return 0;
+    }
+
     // 哈希密码
     QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256);
 
@@ -81,8 +98,6 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
         qDebug() << "Insert query failed:" << error.text();
         if (error.type() == QSqlError::NoError) {
             hintMessage = "注册失败，发生未知错误";
-        } else if (error.nativeErrorCode() == "1062") {
-            hintMessage = "注册失败，该手机号已被注册";
         } else {
             hintMessage = error.text();
         }
