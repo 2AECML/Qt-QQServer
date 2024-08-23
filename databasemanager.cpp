@@ -56,6 +56,12 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
         return 0;
     }
 
+    // 开始事务
+    if (!mDb.transaction()) {
+        hintMessage = "事务启动失败";
+        return 0;
+    }
+
     // 先检查手机号是否已存在
     QSqlQuery checkQuery(mDb);
     checkQuery.prepare(R"(SELECT COUNT(*) FROM db_qq.user_info WHERE phone = :phone)");
@@ -65,11 +71,13 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
         QSqlError error = checkQuery.lastError();
         qDebug() << "Check phone query failed:" << error.text();
         hintMessage = "检查手机号失败，发生未知错误";
+        mDb.rollback();
         return 0;
     }
 
     if (checkQuery.next() && checkQuery.value(0).toInt() > 0) {
         hintMessage = "注册失败，该手机号已被注册";
+        mDb.rollback();
         return 0;
     }
 
@@ -91,6 +99,14 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
             id generatedId = idQuery.value(0).toLongLong();
             hintMessage = "注册成功，QQ账号: " + QString::number(generatedId);
             qDebug() << "Insert query executed successfully, generated ID:" << generatedId;
+
+            // 提交事务
+            if (!mDb.commit()) {
+                hintMessage = "提交事务失败";
+                qDebug() << "Transaction commit failed:" << mDb.lastError().text();
+                return 0;
+            }
+
             return generatedId;
         }
     } else {
@@ -101,6 +117,9 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
         } else {
             hintMessage = error.text();
         }
+
+        // 回滚事务
+        mDb.rollback();
     }
     return 0;
 }
