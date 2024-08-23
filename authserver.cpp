@@ -91,10 +91,7 @@ void AuthServer::respondToClient(QTcpSocket* socket, const QString& type, const 
     json["type"] = type;
     json["success"] = success;
     json["message"] = message;
-
-    if (type == "register") {
-        json["id"] = QString::number(accountID);
-    }
+    json["id"] = QString::number(accountID);
 
     QJsonDocument doc(json);
 

@@ -27,7 +27,7 @@ private:
     void processData(QTcpSocket* socket, const QByteArray& data);
     void verifyLogin(QTcpSocket* socket, const QString& account, const QString& password);
     void verifyRegister(QTcpSocket* socket, const QString& nickname, const QString& password, const QString& phone, const QString& vcode);
-    void respondToClient(QTcpSocket* socket, const QString& type, const bool success, const QString& message, const id accountID = 0);
+    void respondToClient(QTcpSocket* socket, const QString& type, const bool success, const QString& message, const id accountID);
 
 private:
     QMap<QTcpSocket*, qintptr> mSocketMap;
