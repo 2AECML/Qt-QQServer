@@ -178,7 +178,6 @@ void DatabaseManager::closeDatabase() {
 }
 
 bool DatabaseManager::checkDatabase() {
-    QMutexLocker locker(&dbMutex);
 
     if (!db.isOpen()) {
         qDebug() << "Database: connection closed";
@@ -194,7 +193,6 @@ bool DatabaseManager::checkDatabase() {
 }
 
 void DatabaseManager::keepConnectionAlive() {
-    QMutexLocker locker(&dbMutex);
 
     if (db.isOpen() && db.isValid()) {
         QSqlQuery query(db);
