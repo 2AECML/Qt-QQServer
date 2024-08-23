@@ -62,8 +62,7 @@ void HomeServer::processData(QTcpSocket* socket, const QByteArray& data) {
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
     QJsonObject json = jsonDoc.object();
     if (json["type"] == "user_list") {
-        DatabaseManager* databaseManager = DatabaseManager::getInstance();
-        QList<BasicUserInfo> list = databaseManager->getUserList();
+        QList<BasicUserInfo> list = DatabaseManager::getUserList();
         sendUserList(socket, list);
     }
     else {

@@ -4,42 +4,52 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-DatabaseManager* DatabaseManager::instance = nullptr;
-QMutex DatabaseManager::mutex;
+QSqlDatabase DatabaseManager::mDb;
+QMutex DatabaseManager::mDbMutex;
+QString DatabaseManager::mHost = "127.0.0.1";
+quint16 DatabaseManager::mPort = 3306;
+QString DatabaseManager::mUserName = "root";
+QString DatabaseManager::mPassword = "805284158";
+QTimer DatabaseManager::mKeepAliveTimer;
 
-DatabaseManager::DatabaseManager(QObject* parent)
-    : QObject(parent)
-    , mHost("127.0.0.1")
-    , mPort(3306)
-    , mUserName("root")
-    , mPassword("805284158")
-    , mKeepAliveTimer(new QTimer(this)) {
+bool DatabaseManager::initialize() {
+    QMutexLocker locker(&mDbMutex);
 
-    connectToDatabase();
-    connect(mKeepAliveTimer, &QTimer::timeout, this, &DatabaseManager::keepConnectionAlive);
-    mKeepAliveTimer->start(10000);  // 每10秒发送一次保活查询
-}
-
-DatabaseManager::~DatabaseManager() {
-    closeDatabase();
-}
-
-DatabaseManager* DatabaseManager::getInstance() {
-    QMutexLocker locker(&mutex);
-    if (!instance) {
-        instance = new DatabaseManager();
+    if (mDb.isOpen()) {
+        qDebug() << "Database already connected";
+        return true;
     }
-    return instance;
+
+    mDb = QSqlDatabase::addDatabase("QMYSQL");
+    mDb.setHostName(mHost);
+    mDb.setPort(mPort);
+    mDb.setUserName(mUserName);
+    mDb.setPassword(mPassword);
+
+    if (!mDb.open()) {
+        qDebug() << "Error: connection with database failed";
+        qDebug() << "Database error:" << mDb.lastError().text();
+        return false;
+    } else {
+        qDebug() << "Database: connection ok, name:" << mDb.connectionName();
+        setupKeepAlive();
+        return true;
+    }
 }
 
-void DatabaseManager::releaseInstance() {
-    QMutexLocker locker(&mutex);
-    delete instance;
-    instance = nullptr;
+void DatabaseManager::finalize() {
+    QMutexLocker locker(&mDbMutex);
+
+    if (mDb.isOpen()) {
+        mDb.close();
+        qDebug() << "Database connection closed";
+    }
+    QSqlDatabase::removeDatabase(mDb.connectionName());
+    qDebug() << "Database connection removed";
 }
 
 id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage) {
-    QMutexLocker locker(&dbMutex);
+    QMutexLocker locker(&mDbMutex);
 
     if (!checkDatabase()) {
         hintMessage = "数据库连接无效";
@@ -49,7 +59,7 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
     // 哈希密码
     QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256);
 
-    QSqlQuery query(db);
+    QSqlQuery query(mDb);
     query.prepare(R"(INSERT INTO db_qq.user_info (nickname, pwd, phone)
                      VALUES(:nickname, :pwd, :phone))");
     query.bindValue(":nickname", nickname);
@@ -58,7 +68,7 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
 
     if (query.exec()) {
         // 获取自动生成的 ID
-        QSqlQuery idQuery(db);
+        QSqlQuery idQuery(mDb);
         idQuery.exec("SELECT LAST_INSERT_ID()");
         if (idQuery.next()) {
             id generatedId = idQuery.value(0).toLongLong();
@@ -81,14 +91,14 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
 }
 
 bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& password, QString& hintMessage) {
-    QMutexLocker locker(&dbMutex);
+    QMutexLocker locker(&mDbMutex);
 
     if (!checkDatabase()) {
         hintMessage = "数据库连接无效";
         return false;
     }
 
-    QSqlQuery query(db);
+    QSqlQuery query(mDb);
     query.prepare(R"(SELECT * FROM db_qq.user_info
                      WHERE phone = :account OR id = :account)");
     query.bindValue(":account", account);
@@ -117,7 +127,7 @@ bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& pas
 }
 
 QList<BasicUserInfo> DatabaseManager::getUserList() {
-    QMutexLocker locker(&dbMutex);
+    QMutexLocker locker(&mDbMutex);
 
     if (!checkDatabase()) {
         return QList<BasicUserInfo>();
@@ -125,7 +135,7 @@ QList<BasicUserInfo> DatabaseManager::getUserList() {
 
     QList<BasicUserInfo> result;
 
-    QSqlQuery query(db);
+    QSqlQuery query(mDb);
     query.prepare(R"(SELECT * FROM db_qq.user_info)");
 
     if (query.exec()) {
@@ -142,48 +152,13 @@ QList<BasicUserInfo> DatabaseManager::getUserList() {
     return result;
 }
 
-bool DatabaseManager::connectToDatabase() {
-    QMutexLocker locker(&dbMutex);
-
-    if (db.isOpen()) {
-        qDebug() << "Database already connected";
-        return true;
-    }
-
-    db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName(mHost);
-    db.setPort(mPort);
-    db.setUserName(mUserName);
-    db.setPassword(mPassword);
-
-    if (!db.open()) {
-        qDebug() << "Error: connection with database failed";
-        qDebug() << "Database error:" << db.lastError().text();
-        return false;
-    } else {
-        qDebug() << "Database: connection ok";
-        return true;
-    }
-}
-
-void DatabaseManager::closeDatabase() {
-    QMutexLocker locker(&dbMutex);
-
-    if (db.isOpen()) {
-        db.close();
-        qDebug() << "Database connection closed";
-    }
-    QSqlDatabase::removeDatabase(db.connectionName());
-    qDebug() << "Database connection removed";
-}
-
 bool DatabaseManager::checkDatabase() {
 
-    if (!db.isOpen()) {
+    if (!mDb.isOpen()) {
         qDebug() << "Database: connection closed";
         return false;
     }
-    if (!db.isValid()) {
+    if (!mDb.isValid()) {
         qDebug() << "Database: connection is not valid";
         return false;
     }
@@ -192,10 +167,15 @@ bool DatabaseManager::checkDatabase() {
     return true;
 }
 
+void DatabaseManager::setupKeepAlive() {
+    connect(&mKeepAliveTimer, &QTimer::timeout, &DatabaseManager::keepConnectionAlive);
+    mKeepAliveTimer.start(10000);  // 每10秒发送一次保活查询
+}
+
 void DatabaseManager::keepConnectionAlive() {
 
-    if (db.isOpen() && db.isValid()) {
-        QSqlQuery query(db);
+    if (mDb.isOpen() && mDb.isValid()) {
+        QSqlQuery query(mDb);
         query.exec("SELECT 1");  // 简单的查询以保持连接活跃
     }
 }

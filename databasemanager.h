@@ -21,38 +21,32 @@ class DatabaseManager : public QObject
 {
     Q_OBJECT
 public:
-
-
-    static DatabaseManager *getInstance();
-    static void releaseInstance();
-
-    id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
-    bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
-    QList<BasicUserInfo> getUserList();
+    static bool initialize();
+    static void finalize();
+    static id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
+    static bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
+    static QList<BasicUserInfo> getUserList();
 
 private:
-    explicit DatabaseManager(QObject* parent = nullptr);
-    ~DatabaseManager();
+    DatabaseManager() = delete; // 禁止创建实例
+    DatabaseManager(const DatabaseManager&) = delete;
+    DatabaseManager& operator=(const DatabaseManager&) = delete;
 
-    bool connectToDatabase();
-    void closeDatabase();
-    bool checkDatabase();
-
-private slots:
-    void keepConnectionAlive();
+    static bool checkDatabase();
+    static void setupKeepAlive();
+    static void keepConnectionAlive();
 
 private:
-    QString mHost;
-    int mPort;
-    QString mUserName;
-    QString mPassword;
+    static QMutex mDbMutex;       // 用于数据库操作的互斥量
+    static QSqlDatabase mDb;
 
-    QTimer* mKeepAliveTimer;
+    static QString mHost;
+    static quint16 mPort;
+    static QString mUserName;
+    static QString mPassword;
 
-    static DatabaseManager* instance;
-    static QMutex mutex;  // 用于管理 DatabaseManager 实例的互斥量
-    QMutex dbMutex;       // 用于数据库操作的互斥量
-    QSqlDatabase db;
+    static QTimer mKeepAliveTimer;
+
 };
 
 #endif // DATABASEMANAGER_H
