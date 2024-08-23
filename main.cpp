@@ -15,8 +15,6 @@ int main(int argc, char *argv[])
     HomeServer hs;
     hs.startServer();
 
-    DatabaseManager::finalize();
-
     int ret = a.exec();
 
     DatabaseManager::finalize();
