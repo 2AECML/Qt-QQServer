@@ -64,6 +64,9 @@ void AuthServer::processData(QTcpSocket* socket, const QByteArray &data) {
     else if (json["type"] == "register") {
         verifyRegister(socket, json["nickname"].toString(), json["password"].toString(), json["phone"].toString(), json["vcode"].toString());
     }
+    else {
+        qDebug() << "AuthServer: An unknown type of json was received";
+    }
 }
 
 void AuthServer::verifyLogin(QTcpSocket* socket, const QString& account, const QString& password) {
