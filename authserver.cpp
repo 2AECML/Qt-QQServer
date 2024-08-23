@@ -13,7 +13,7 @@ void AuthServer::startServer() {
     }
     else {
         qDebug() << "Auth server could not start!";
-        qDebug() << "Error" << this->errorString();
+        qDebug() << "Auth server: Error" << this->errorString();
     }
 }
 
@@ -24,7 +24,7 @@ void AuthServer::incomingConnection(qintptr socketDescriptor) {
     connect(socket, &QTcpSocket::readyRead, this, &AuthServer::onReadyRead);
     connect(socket, &QTcpSocket::stateChanged, this, &AuthServer::onSocketStateChanged);
 
-    qDebug() << "Client connected: " << socketDescriptor;
+    qDebug() << "Auth server: Client connected: " << socketDescriptor;
 
     // 记录套接字描述符和套接字对象的映射
     mSocketMap.insert(socket, socket->socketDescriptor());
@@ -48,7 +48,7 @@ void AuthServer::onSocketStateChanged(QAbstractSocket::SocketState socketState) 
         QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
         if (socket) {
             qintptr socketDescriptor = mSocketMap[socket];
-            qDebug() << "Client disconnected: " << socketDescriptor;
+            qDebug() << "Auth server: Client disconnected: " << socketDescriptor;
             mSocketMap.remove(socket);
             socket->deleteLater();
         }

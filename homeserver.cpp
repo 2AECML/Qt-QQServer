@@ -15,7 +15,7 @@ void HomeServer::startServer() {
     }
     else {
         qDebug() << "Home server could not start!";
-        qDebug() << "Error" << this->errorString();
+        qDebug() << "HomeServer: Error" << this->errorString();
     }
 }
 
@@ -26,7 +26,7 @@ void HomeServer::incomingConnection(qintptr socketDescriptor) {
     connect(socket, &QTcpSocket::readyRead, this, &HomeServer::onReadyRead);
     connect(socket, &QTcpSocket::stateChanged, this, &HomeServer::onSocketStateChanged);
 
-    qDebug() << "Client connected: " << socketDescriptor;
+    qDebug() << "HomeServer: Client connected: " << socketDescriptor;
 
     // 记录套接字描述符和套接字对象的映射
     mSocketMap.insert(socket, socket->socketDescriptor());
@@ -41,7 +41,7 @@ void HomeServer::onReadyRead() {
         if (data == "CLOSE") {
             socket->close();
         }
-        qDebug() << "Data received:" << data;
+        qDebug() << "HomeServer: Data received:" << data;
         processData(socket, data);
     }
 }
@@ -51,7 +51,7 @@ void HomeServer::onSocketStateChanged(QAbstractSocket::SocketState socketState) 
         QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
         if (socket) {
             qintptr socketDescriptor = mSocketMap[socket];
-            qDebug() << "Client disconnected: " << socketDescriptor;
+            qDebug() << "HomeServer: Client disconnected: " << socketDescriptor;
             mSocketMap.remove(socket);
             socket->deleteLater();
         }
