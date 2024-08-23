@@ -71,7 +71,7 @@ void HomeServer::processData(QTcpSocket* socket, const QByteArray& data) {
         sendUserInfo(socket, info);
     }
     else {
-        qDebug() << "HomeServer: An unknown type of json was received";
+        qDebug() << "HomeServer: An unknown type of json was received: " << json;
     }
 }
 
