@@ -170,7 +170,7 @@ QList<BasicUserInfo> DatabaseManager::getUserList() {
     QList<BasicUserInfo> result;
 
     QSqlQuery query(mDb);
-    query.prepare(R"(SELECT * FROM db_qq.user_info)");
+    query.prepare(R"(SELECT id, nickname FROM db_qq.user_info)");
 
     if (query.exec()) {
         while (query.next()) {
@@ -179,6 +179,30 @@ QList<BasicUserInfo> DatabaseManager::getUserList() {
             info.nickname = query.value("nickname").toString();
             result.append(info);
         }
+    } else {
+        qDebug() << "Failed to execute query:" << query.lastError().text();
+    }
+
+    return result;
+}
+
+BasicUserInfo DatabaseManager::getUserInfo(const QString &accountID) {
+    QMutexLocker locker(&mDbMutex);
+
+    if (!checkDatabase()) {
+        return BasicUserInfo();
+    }
+
+    BasicUserInfo result;
+
+    QSqlQuery query(mDb);
+    query.prepare(R"(SELECT id, nickname FROM db_qq.user_info
+                     WHERE id = :id)");
+    query.bindValue(":id", accountID);
+
+    if (query.exec()) {
+        result.id = query.value("id").toString();
+        result.nickname = query.value("nickname").toString();
     } else {
         qDebug() << "Failed to execute query:" << query.lastError().text();
     }

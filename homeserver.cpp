@@ -65,6 +65,11 @@ void HomeServer::processData(QTcpSocket* socket, const QByteArray& data) {
         QList<BasicUserInfo> list = DatabaseManager::getUserList();
         sendUserList(socket, list);
     }
+    else if (json["type"] == "user_info") {
+        QString accountID = json["id"].toString();
+        BasicUserInfo info = DatabaseManager::getUserInfo(accountID);
+        sendUserInfo(socket, info);
+    }
     else {
         qDebug() << "HomeServer: An unknown type of json was received";
     }
@@ -82,7 +87,18 @@ void HomeServer::sendUserList(QTcpSocket* socket, const QList<BasicUserInfo>& li
 
     QJsonObject jsonObj;
     jsonObj["type"] = "user_list";
-    jsonObj["data"] = jsonArray;
+    jsonObj["list"] = jsonArray;
+
+    QJsonDocument jsonDoc(jsonObj);
+
+    socket->write(jsonDoc.toJson());
+}
+
+void HomeServer::sendUserInfo(QTcpSocket* socket, const BasicUserInfo& info) {
+    QJsonObject jsonObj;
+    jsonObj["type"] = "user_info";
+    jsonObj["nickname"] = info.nickname;
+    jsonObj["id"] = info.id;
 
     QJsonDocument jsonDoc(jsonObj);
 

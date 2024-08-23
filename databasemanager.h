@@ -26,6 +26,7 @@ public:
     static id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
     static bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
     static QList<BasicUserInfo> getUserList();
+    static BasicUserInfo getUserInfo(const QString& accountID);
 
 private:
     DatabaseManager() = delete; // 禁止创建实例

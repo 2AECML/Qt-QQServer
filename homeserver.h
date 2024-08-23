@@ -23,6 +23,7 @@ private slots:
 private:
     void processData(QTcpSocket* socket, const QByteArray& data);
     void sendUserList(QTcpSocket* socket, const QList<BasicUserInfo>& list);
+    void sendUserInfo(QTcpSocket* socket, const BasicUserInfo& info);
 
 private:
     QMap<QTcpSocket*, qintptr> mSocketMap;
