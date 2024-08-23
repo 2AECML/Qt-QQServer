@@ -124,16 +124,17 @@ id DatabaseManager::insertRegisterInfo(const QString& nickname, const QString& p
     return 0;
 }
 
-bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& password, QString& hintMessage) {
+id DatabaseManager::verifyLoginInfo(const QString& account, const QString& password, QString& hintMessage) {
     QMutexLocker locker(&mDbMutex);
 
     if (!checkDatabase()) {
         hintMessage = "数据库连接无效";
-        return false;
+        return 0;
     }
 
     QSqlQuery query(mDb);
-    query.prepare(R"(SELECT * FROM db_qq.user_info
+
+    query.prepare(R"(SELECT id, pwd FROM db_qq.user_info
                      WHERE phone = :account OR id = :account)");
     query.bindValue(":account", account);
 
@@ -147,16 +148,17 @@ bool DatabaseManager::verifyLoginInfo(const QString& account, const QString& pas
         if (storedHashedPassword == inputHashedPassword) {
             hintMessage = "登陆成功";
             qDebug() << "Login query executed successfully";
-            return true;
+            id accountID = query.value("id").toLongLong();
+            return accountID;
         } else {
             hintMessage = "登陆失败，账号或密码错误";
             qDebug() << "Login query failed: incorrect password";
-            return false;
+            return 0;
         }
     } else {
         hintMessage = "登陆失败，不存在该账号";
         qDebug() << "Login query failed: account not found";
-        return false;
+        return 0;
     }
 }
 

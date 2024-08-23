@@ -24,7 +24,7 @@ public:
     static bool initialize();
     static void finalize();
     static id insertRegisterInfo(const QString& nickname, const QString& password, const QString& phone, QString& hintMessage);
-    static bool verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
+    static id verifyLoginInfo(const QString& account, const  QString& password, QString& hintMessage);
     static QList<BasicUserInfo> getUserList();
     static BasicUserInfo getUserInfo(const QString& accountID);
 

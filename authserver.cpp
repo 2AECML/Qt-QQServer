@@ -72,15 +72,16 @@ void AuthServer::processData(QTcpSocket* socket, const QByteArray &data) {
 
 void AuthServer::verifyLogin(QTcpSocket* socket, const QString& account, const QString& password) {
     QString message;
-    bool success = DatabaseManager::verifyLoginInfo(account, password, message);
+    id accountID = DatabaseManager::verifyLoginInfo(account, password, message);
+    bool success = accountID;
     // qDebug() << message;
-    respondToClient(socket, "login", success, message);
+    respondToClient(socket, "login", success, message, accountID);
 }
 
 void AuthServer::verifyRegister(QTcpSocket* socket, const QString& nickname, const QString& password, const QString& phone, const QString& vcode) {
     QString message;
     id accountID = DatabaseManager::insertRegisterInfo(nickname, password, phone, message);
-    bool success = accountID != 0 ? true : false;
+    bool success = accountID;
     // qDebug() << message;
     respondToClient(socket, "register", success, message, accountID);
 }
