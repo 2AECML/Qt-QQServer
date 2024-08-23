@@ -37,6 +37,7 @@ void AuthServer::onReadyRead() {
         QByteArray data = socket->readAll();
         if (data == "CLOSE") {
             socket->close();
+            return;
         }
         // qDebug() << "Data received:" << data;
         processData(socket, data);
@@ -65,7 +66,7 @@ void AuthServer::processData(QTcpSocket* socket, const QByteArray &data) {
         verifyRegister(socket, json["nickname"].toString(), json["password"].toString(), json["phone"].toString(), json["vcode"].toString());
     }
     else {
-        qDebug() << "AuthServer: An unknown type of json was received: " << json;
+        qDebug() << "AuthServer: An unknown type of json was received: " << data;
     }
 }
 
