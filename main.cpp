@@ -17,5 +17,9 @@ int main(int argc, char *argv[])
 
     DatabaseManager::finalize();
 
-    return a.exec();
+    int ret = a.exec();
+
+    DatabaseManager::finalize();
+
+    return ret;
 }
