@@ -202,7 +202,7 @@ BasicUserInfo DatabaseManager::getUserInfo(const QString &accountID) {
                      WHERE id = :id)");
     query.bindValue(":id", accountID);
 
-    if (query.exec()) {
+    if (query.exec() && query.next()) {
         result.id = query.value("id").toString();
         result.nickname = query.value("nickname").toString();
     } else {

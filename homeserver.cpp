@@ -114,7 +114,10 @@ void HomeServer::sendUserList(QTcpSocket* socket, const QList<BasicUserInfo>& li
 
     QJsonDocument jsonDoc(jsonObj);
 
-    socket->write(jsonDoc.toJson());
+    // 将 QJsonDocument 转换为字节数组，并在其末尾添加分隔符 "\r\n\r\n"
+    QByteArray data = jsonDoc.toJson() + "\r\n\r\n";
+
+    socket->write(data);
 }
 
 void HomeServer::sendUserInfo(QTcpSocket* socket, const BasicUserInfo& info) {
@@ -125,5 +128,8 @@ void HomeServer::sendUserInfo(QTcpSocket* socket, const BasicUserInfo& info) {
 
     QJsonDocument jsonDoc(jsonObj);
 
-    socket->write(jsonDoc.toJson());
+    // 将 QJsonDocument 转换为字节数组，并在其末尾添加分隔符 "\r\n\r\n"
+    QByteArray data = jsonDoc.toJson() + "\r\n\r\n";
+
+    socket->write(data);
 }
