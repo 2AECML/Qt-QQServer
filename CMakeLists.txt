@@ -17,6 +17,7 @@ add_executable(QQServer
   authserver.h authserver.cpp
   databasemanager.h databasemanager.cpp
   homeserver.h homeserver.cpp
+  basicserver.h basicserver.cpp
 )
 target_link_libraries(QQServer Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Sql)
 
