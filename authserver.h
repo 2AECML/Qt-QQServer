@@ -2,7 +2,7 @@
 #define AUTHSERVER_H
 
 #include "databasemanager.h"
-#include "basicserver.h"
+#include "basictcpserver.h"
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QList>
@@ -10,8 +10,7 @@
 #include <QJsonObject>
 #include <QMap>
 
-class AuthServer : public BasicServer
-{
+class AuthServer : public BasicTcpServer {
     Q_OBJECT
 public:
     explicit AuthServer(QObject* parent = nullptr);

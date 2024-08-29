@@ -4,7 +4,7 @@
 #include <QJsonArray>
 
 HomeServer::HomeServer(QObject *parent)
-    : BasicServer(8053, parent) {
+    : BasicTcpServer(8053, parent) {
 
 }
 

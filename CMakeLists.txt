@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network Sql)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network Sql WebSockets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Sql)
 
 add_executable(QQServer
@@ -17,7 +17,9 @@ add_executable(QQServer
   authserver.h authserver.cpp
   databasemanager.h databasemanager.cpp
   homeserver.h homeserver.cpp
-  basicserver.h basicserver.cpp
+  basictcpserver.h basictcpserver.cpp
+
+  basicwebserver.h basicwebserver.cpp
 )
 target_link_libraries(QQServer Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Sql)
 

@@ -2,13 +2,12 @@
 #define HOMESERVER_H
 
 #include "databasemanager.h"
-#include "basicserver.h"
+#include "basictcpserver.h"
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QString>
 
-class HomeServer : public BasicServer
-{
+class HomeServer : public BasicTcpServer {
     Q_OBJECT
 public:
     explicit HomeServer(QObject *parent = nullptr);

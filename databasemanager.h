@@ -17,8 +17,7 @@ struct BasicUserInfo {
     QString id;
 };
 
-class DatabaseManager : public QObject
-{
+class DatabaseManager : public QObject {
     Q_OBJECT
 public:
     static bool initialize();

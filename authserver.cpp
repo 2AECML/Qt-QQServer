@@ -2,7 +2,7 @@
 #include <QJsonDocument>
 
 AuthServer::AuthServer(QObject *parent)
-    : BasicServer(8052, parent){
+    : BasicTcpServer(8052, parent){
 
 }
 
