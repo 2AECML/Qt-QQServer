@@ -1,5 +1,5 @@
-const HOST = '192.168.124.129';
 
+const os = require('os');
 const express = require('express');
 const app = express();
 const WebSocket = require('ws');
@@ -11,6 +11,21 @@ const expressPort = 8081; // Express服务器的端口
 const userConnections = new Map();  // 用户连接映射
 
 let gfs;
+
+// 获取本机的 IP 地址
+function getLocalIpAddress() {
+    const interfaces = os.networkInterfaces();
+    for (const interfaceName in interfaces) {
+        for (const iface of interfaces[interfaceName]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                return iface.address;
+            }
+        }
+    }
+    return '127.0.0.1'; // 默认回退到 localhost
+}
+
+const HOST = getLocalIpAddress(); // 获取当前 IP 地址
 
 // 下载文件的路由
 app.get('/file/:id', async (req, res) => {
